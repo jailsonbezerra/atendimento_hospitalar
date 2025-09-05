@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Usuario {
+  id String @id @default(uuid())
+  email String @unique @db.VarChar(255)
+  hash_senha String
+  papel Papel @default(PACIENTE)
+
+  paciente Paciente?
+  medico Medico?
+  atendente Atendente?
+
+  @@map("usuarios")
+}
+
+model Paciente {
+  id String @id @default(uuid())
+  sus String? @unique
+  nome String
+  data_nascimento DateTime
+  sexo Sexo
+  usuario_id String @unique
+
+  triagem Triagem[]
+  atendimento Atendimento[]
+
+  usuario Usuario @relation(fields: [usuario_id], references: [id])
+
+  @@map("pacientes")
+}
+
+model Medico {
+  id String @id @default(uuid())
+  prm String @unique
+  nome String
+  usuario_id String @unique
+
+  atendimento Atendimento[]
+
+  usuario Usuario @relation(fields: [usuario_id], references: [id])
+
+  @@map("medicos")
+}
+
+model Atendente {
+  id String @id @default(uuid())
+  corem String @unique
+  nome String
+  usuario_id String @unique
+  data DateTime @default(now())
+
+  triagem Triagem[]
+
+  usuario Usuario @relation(fields: [usuario_id], references: [id])
+
+  @@map("atendentes")
+}
+
+model Triagem {
+  id String @id @default(uuid())
+  peso Decimal @db.Decimal(8, 2)
+  altura Decimal @db.Decimal(8, 2)
+  temperatura Int
+  pressao String
+  paciente_id String
+  atendente_id String
+  prioridade Prioridade
+  data DateTime @default(now())
+
+  atendimento Atendimento?
+
+  paciente Paciente @relation(fields: [paciente_id], references: [id])
+  atendente Atendente @relation(fields: [atendente_id], references: [id])
+  
+  @@map("triagens")
+}
+
+model Atendimento {
+  id String @id @default(uuid())
+  triagem_id String? @unique
+  medico_id String
+  paciente_id String
+
+  diagnostico Diagnostico[]
+  medicacao Medicacao[]
+
+  triagem Triagem? @relation(fields: [triagem_id], references: [id])
+  medico Medico @relation(fields: [medico_id], references: [id])
+  paciente Paciente @relation(fields: [paciente_id], references: [id])
+
+  @@map("atendimentos")
+}
+
+model Diagnostico {
+  id String @id @default(uuid())
+  diagnostico String
+  atendimento_id String
+
+  atendimento Atendimento @relation(fields: [atendimento_id], references: [id])
+
+  @@map("diagnosticos")
+}
+
+model Medicacao {
+  id String @id @default(uuid())
+  medicacao String
+  atendimento_id String
+
+  atendimento Atendimento @relation(fields: [atendimento_id], references: [id])
+
+  @@map("medicacoes")
+}
+
+enum Papel {
+  PACIENTE
+  ATENDENTE
+  MEDICO
+  ADMIN
+}
+
+enum Sexo {
+  MASCULINO
+  FEMININO
+}
+
+enum Prioridade {
+  NAO_URGENTE
+  POUCO_URGENTE
+  URGENTE
+  MUITO_URGENTE
+  EMERGENCIA
+}
