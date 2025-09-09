@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt'
+import awt from 'jsonwebtoken'
 
 import usuarioModel from '../models/Usuario.model.js'
 
@@ -6,17 +7,30 @@ import usuarioModel from '../models/Usuario.model.js'
 class UsuarioService {
     async create(data) {
         const hashSenha = await bcrypt.hash(data.senha, 10)
-        data.papel = data.papel.toUpperCase()
+
         data.data_nascimento = new Date(data.data_nascimento)
         data.sexo = data.sexo.toUpperCase()
 
-        console.log(data)
+        if (data.papel) data.papel = data.papel.toUpperCase()
 
-        await usuarioModel.create({
+        return await usuarioModel.create({
             ...data,
-            hash_senha: hashSenha,
-            papel: data.papel.toUpperCase()
+            hash_senha: hashSenha
         })
+    }
+
+    async login(email, senha) {
+        const usuario = await usuarioModel.findByEmail(email)
+
+        if (!usuario) throw new Error('Email ou senha inválidos')
+
+        const senhaValida = await bcrypt.compare(senha, usuario.hash_senha)
+
+        if (!senhaValida) throw new Error('Email ou senha inválidos')
+
+        const token = awt.sign({ id: usuario.id, email: usuario.email, papel: usuario.papel }, process.env.JWT_SECRET, { expiresIn: '1d' })
+
+        return { mensagem: 'Login realizado com sucesso', token }
     }
 
     async findAll() {
@@ -27,23 +41,24 @@ class UsuarioService {
         return await usuarioModel.findById(id)
     }
 
-    async findBySus(sus) {
-        return await usuarioModel.findBySus(sus)
+    async findByEmail(email) {
+        return await usuarioModel.findByEmail(email)
     }
 
     async update(id, data) {
-        const hashSenha = await bcrypt.hash(data.senha, 10)
+        let hashSenha = null
+        
+        if (data.data_nascimento) data.data_nascimento = new Date(data.data_nascimento)
+        if (data.sexo) data.sexo = data.sexo.toUpperCase()
+        if (data.papel) data.papel = data.papel.toUpperCase()
+                    
+        if (data.senha) {
+            hashSenha = await bcrypt.hash(data.senha, 10)
 
-        const paciente = {
-            email,
-            hash_senha: hashSenha,
-            sus,
-            nome,
-            data_nascimento,
-            sexo
+            return await usuarioModel.update(id, { ...data, hash_senha: hashSenha })
         }
 
-        return await usuarioModel.update(id, { data: paciente })
+        return await usuarioModel.update(id, { data })
     }
 
     async delete(id) {

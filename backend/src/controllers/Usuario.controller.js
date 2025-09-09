@@ -14,6 +14,18 @@ class UsuarioController {
         }
     }
 
+    async login(req, res) {
+        const { email, senha } = req.body
+
+        try {
+            const { mensagem, token } = await usuarioService.login(email, senha)
+
+            return res.status(200).json({ mensagem, token })
+        } catch (error) {
+            return res.status(400).json({ error: error.message })
+        }
+    }
+
     async findAll(req, res) {
         try {
             const pacientes = await usuarioService.findAll()

@@ -2,6 +2,8 @@ import express from 'express'
 
 import usuarioController from '../controllers/Usuario.controller.js'
 
+import { autenticarAdmin } from '../middlewares/autenticarUsuario.js'
+
 
 class UsuarioRoute {
     constructor() {
@@ -10,12 +12,11 @@ class UsuarioRoute {
     }
 
     routes() {
-        this.app.get('/pacientes', usuarioController.findAll)
-        this.app.get('/pacientes/:id', usuarioController.findById)
-        this.app.get('/pacientes/sus/:sus', usuarioController.findBySus)
-        this.app.post('/pacientes', usuarioController.create)
-        this.app.put('/pacientes/:id', usuarioController.update)
-        this.app.delete('/pacientes/:id', usuarioController.delete)
+        this.app.post('/login', usuarioController.login)
+        this.app.post('/create', usuarioController.create)
+        this.app.get('/usuarios/:id', autenticarAdmin, usuarioController.findById)
+        this.app.put('/usuarios/:id', autenticarAdmin, usuarioController.update)
+        this.app.delete('/usuarios/:id', autenticarAdmin, usuarioController.delete)
     }
 }
 
