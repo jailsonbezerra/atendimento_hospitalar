@@ -7,17 +7,18 @@ import { autenticarAdmin } from '../middlewares/autenticarUsuario.js'
 
 class UsuarioRoute {
     constructor() {
-        this.app = express.Router()
+        this.route = express.Router()
         this.routes()
     }
 
     routes() {
-        this.app.post('/login', usuarioController.login)
-        this.app.post('/create', usuarioController.create)
-        this.app.get('/usuarios/:id', autenticarAdmin, usuarioController.findById)
-        this.app.put('/usuarios/:id', autenticarAdmin, usuarioController.update)
-        this.app.delete('/usuarios/:id', autenticarAdmin, usuarioController.delete)
+        this.route.post('/login', usuarioController.login)
+        this.route.post('/create', autenticarAdmin, usuarioController.create)
+        this.route.get('', usuarioController.findAll)
+        this.route.get('/:id', autenticarAdmin, usuarioController.findById)
+        this.route.put('/:id', autenticarAdmin, usuarioController.update)
+        this.route.delete('/:id', autenticarAdmin, usuarioController.delete)
     }
 }
 
-export default new UsuarioRoute().app
+export default new UsuarioRoute().route

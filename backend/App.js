@@ -2,7 +2,9 @@ import express from 'express'
 import cors from 'cors'
 
 import UsuarioRoute from './src/routes/Usuario.route.js'
-
+import PacienteRoute from './src/routes/Paciente.route.js'
+import CadastroPacienteRoute from './src/routes/CadastroPaciente.route.js'
+import TriagemRoute from './src/routes/Triagem.route.js'
 
 class App {
     constructor() {
@@ -18,7 +20,10 @@ class App {
     }
 
     routes() {
-        this.app.use('/api', UsuarioRoute)
+        this.app.use('/api/usuarios', UsuarioRoute)
+        this.app.use('/api/pacientes', PacienteRoute)
+        this.app.use('/api/cadastro-pacientes', CadastroPacienteRoute)
+        this.app.use('/api/triagens', TriagemRoute)
     }
 }
 

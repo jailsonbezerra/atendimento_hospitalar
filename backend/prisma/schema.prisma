@@ -18,10 +18,10 @@ datasource db {
 model Usuario {
   id String @id @default(uuid())
   email String @unique @db.VarChar(255)
+  nome String @db.VarChar(255)
   hash_senha String
-  papel Papel @default(PACIENTE)
+  papel Papel
 
-  paciente Paciente?
   medico Medico?
   atendente Atendente?
 
@@ -30,29 +30,39 @@ model Usuario {
 
 model Paciente {
   id String @id @default(uuid())
-  sus String? @unique
+  sus String @unique
   nome String
   data_nascimento DateTime
   sexo Sexo
-  usuario_id String @unique
 
-  triagem Triagem[]
+  cadastro CadastroPaciente[]  
   atendimento Atendimento[]
 
-  usuario Usuario @relation(fields: [usuario_id], references: [id])
-
   @@map("pacientes")
+}
+
+model CadastroPaciente {
+  id String @id @default(uuid())
+  prioridade Prioridade @default(NAO_URGENTE)
+  paciente_id String
+  status_triagem StatusTriagem @default(AGUARDANDO)
+  status_atendimento StatusAtendimento @default(AGUARDANDO)
+
+  triagem Triagem?
+
+  paciente Paciente @relation(fields: [paciente_id], references: [id], onDelete: Cascade)
+
+  @@map("cadastro_pacientes")
 }
 
 model Medico {
   id String @id @default(uuid())
   prm String @unique
-  nome String
   usuario_id String @unique
 
   atendimento Atendimento[]
 
-  usuario Usuario @relation(fields: [usuario_id], references: [id])
+  usuario Usuario @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
 
   @@map("medicos")
 }
@@ -60,13 +70,11 @@ model Medico {
 model Atendente {
   id String @id @default(uuid())
   corem String @unique
-  nome String
   usuario_id String @unique
-  data DateTime @default(now())
 
   triagem Triagem[]
 
-  usuario Usuario @relation(fields: [usuario_id], references: [id])
+  usuario Usuario @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
 
   @@map("atendentes")
 }
@@ -77,15 +85,15 @@ model Triagem {
   altura Decimal @db.Decimal(8, 2)
   temperatura Int
   pressao String
-  paciente_id String
+  cadastro_id String @unique
   atendente_id String
-  prioridade Prioridade
-  data DateTime @default(now())
+  data_inicio DateTime @default(now())
+  data_fim DateTime?
 
   atendimento Atendimento?
 
-  paciente Paciente @relation(fields: [paciente_id], references: [id])
-  atendente Atendente @relation(fields: [atendente_id], references: [id])
+  cadastro CadastroPaciente  @relation(fields: [cadastro_id], references: [id], onDelete: Cascade)
+  atendente Atendente @relation(fields: [atendente_id], references: [id], onDelete: Cascade)
   
   @@map("triagens")
 }
@@ -95,13 +103,15 @@ model Atendimento {
   triagem_id String? @unique
   medico_id String
   paciente_id String
+  data_inicio DateTime @default(now())
+  data_fim DateTime?
 
   diagnostico Diagnostico[]
   medicacao Medicacao[]
 
-  triagem Triagem? @relation(fields: [triagem_id], references: [id])
-  medico Medico @relation(fields: [medico_id], references: [id])
-  paciente Paciente @relation(fields: [paciente_id], references: [id])
+  triagem Triagem? @relation(fields: [triagem_id], references: [id], onDelete: Cascade)
+  medico Medico @relation(fields: [medico_id], references: [id], onDelete: Cascade)
+  paciente Paciente @relation(fields: [paciente_id], references: [id], onDelete: Cascade)
 
   @@map("atendimentos")
 }
@@ -111,7 +121,7 @@ model Diagnostico {
   diagnostico String
   atendimento_id String
 
-  atendimento Atendimento @relation(fields: [atendimento_id], references: [id])
+  atendimento Atendimento @relation(fields: [atendimento_id], references: [id], onDelete: Cascade)
 
   @@map("diagnosticos")
 }
@@ -121,13 +131,12 @@ model Medicacao {
   medicacao String
   atendimento_id String
 
-  atendimento Atendimento @relation(fields: [atendimento_id], references: [id])
+  atendimento Atendimento @relation(fields: [atendimento_id], references: [id], onDelete: Cascade)
 
   @@map("medicacoes")
 }
 
 enum Papel {
-  PACIENTE
   ATENDENTE
   MEDICO
   ADMIN
@@ -144,4 +153,16 @@ enum Prioridade {
   URGENTE
   MUITO_URGENTE
   EMERGENCIA
+}
+
+enum StatusTriagem {
+  AGUARDANDO
+  EM_ANDAMENTO
+  CONCLUIDA
+}
+
+enum StatusAtendimento {
+  AGUARDANDO
+  EM_ANDAMENTO
+  CONCLUIDO
 }

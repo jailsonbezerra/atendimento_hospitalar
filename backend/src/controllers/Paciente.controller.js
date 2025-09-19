@@ -1,24 +1,12 @@
-import usuarioService from '../services/Usuario.service.js'
+import pacienteService from '../services/Paciente.service.js'
 
 
-class UsuarioController {
+class PacienteController {
     async create(req, res) {
         try {
-            const usuario = await usuarioService.create(req.body)
+            const paciente = await pacienteService.create(req.body)
 
-            return res.status(201).json(usuario)
-        } catch (error) {
-            return res.status(400).json({ error: error.message })
-        }
-    }
-
-    async login(req, res) {
-        const { email, senha } = req.body
-
-        try {
-            const { mensagem, token } = await usuarioService.login(email, senha)
-
-            return res.status(200).json({ mensagem, token })
+            return res.status(201).json(paciente)
         } catch (error) {
             return res.status(400).json({ error: error.message })
         }
@@ -26,9 +14,21 @@ class UsuarioController {
 
     async findAll(req, res) {
         try {
-            const usuarios = await usuarioService.findAll()
+            const pacientes = await pacienteService.findAll()
 
-            return res.status(200).json(usuarios)
+            return res.status(200).json(pacientes)
+        } catch (error) {
+            return res.status(400).json({ error: error.message })
+        }
+    }
+
+    async findBySus(req, res) {
+        const { sus } = req.params
+
+        try {
+            const paciente = await pacienteService.findBySus(sus)
+
+            return res.status(200).json(paciente)
         } catch (error) {
             return res.status(400).json({ error: error.message })
         }
@@ -38,9 +38,9 @@ class UsuarioController {
         const { id } = req.params
 
         try {
-            const usuario = await usuarioService.findById(id)
+            const paciente = await pacienteService.findById(id)
 
-            return res.status(200).json(usuario)
+            return res.status(200).json(paciente)
         } catch (error) {
             return res.status(400).json({ error: error.message })
         }
@@ -50,9 +50,9 @@ class UsuarioController {
         const { id } = req.params
 
         try {
-            const usuario = await usuarioService.update(id, req.body)
+            const paciente = await pacienteService.update(id, req.body)
 
-            return res.status(200).json(usuario)
+            return res.status(200).json(paciente)
         } catch (error) {
             return res.status(400).json({ error: error.message })
         }
@@ -62,7 +62,7 @@ class UsuarioController {
         const { id } = req.params
 
         try {
-            await usuarioService.delete(id)
+            await pacienteService.delete(id)
 
             return res.status(204).json()
         } catch (error) {
@@ -71,4 +71,4 @@ class UsuarioController {
     }
 }
 
-export default new UsuarioController()
+export default new PacienteController()

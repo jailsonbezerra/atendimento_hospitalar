@@ -1,60 +1,48 @@
-import {prisma} from './prisma.js'
+import { prisma } from './prisma.js'
 
 
-class usuarioModel {
+class UsuarioModel {
     async create(data) {        
-        const usuario = await prisma.usuario.create({ 
-            data: {
-                email: data.email,
-                hash_senha: data.hash_senha,
-                papel: data.papel,
+        return await prisma.$transaction(async (tx) => {
+            const usuario = await tx.usuario.create({ 
+                data: {
+                    email: data.email,
+                    nome: data.nome,
+                    hash_senha: data.hash_senha,
+                    papel: data.papel,
+                }
+            })
+
+            switch (data.papel) {
+                case 'ATENDENTE':
+                    await tx.atendente.create({ 
+                        data: {
+                            corem: data.corem,
+                            usuario_id: usuario.id
+                        }
+                    })
+
+                    break
+
+                case 'MEDICO':
+                    await tx.medico.create({ 
+                        data: {
+                            prm: data.prm,
+                            usuario_id: usuario.id
+                        }
+                    })
+
+                    break
+
+                case 'ADMIN':
+                    break
+
+                default:
+                    break
             }
+
+            return usuario
         })
-        
-        switch (data.papel) {
-            case 'PACIENTE':
-                await prisma.paciente.create({ 
-                    data: {
-                        sus: data.sus,
-                        nome: data.nome,
-                        data_nascimento: data.data_nascimento,
-                        sexo: data.sexo,
-                        usuario_id: usuario.id
-                    }
-                })
-
-                break
-
-            case 'ATENDENTE':
-                await prisma.atendente.create({ 
-                    data: {
-                        nome: data.nome,
-                        corem: data.corem,
-                        usuario_id: usuario.id
-                    }
-                })
-
-                break
-
-            case 'MEDICO':
-                await prisma.medico.create({ 
-                    data: {
-                        nome: data.nome,
-                        prm: data.prm,
-                        usuario_id: usuario.id
-                    }
-                })
-
-                break
-
-            case 'ADMIN':
-                break
-
-            default:
-                break
-        }
-
-        return usuario
     }
 
     async findAll() {
@@ -62,8 +50,8 @@ class usuarioModel {
             select: {
                 id: true,
                 email: true,
+                nome: true,
                 papel: true,
-                paciente: true,
                 atendente: true,
                 medico: true
             }
@@ -76,8 +64,8 @@ class usuarioModel {
             select: {
                 id: true,
                 email: true,
+                nome: true,
                 papel: true,
-                paciente: true,
                 atendente: true,
                 medico: true
             }
@@ -89,62 +77,41 @@ class usuarioModel {
     }
 
     async update(id, data) {
-        const usuario = await prisma.usuario.update({ 
-            data: {
-                email: data.email,
-                hash_senha: data.hash_senha,
-                papel: data.papel,
-            }, 
-            where: { id }
-        })
-        
-        switch (data.papel) {
-            case 'PACIENTE':
-                await prisma.paciente.update({ 
-                    data: {
-                        sus: data.sus,
-                        nome: data.nome,
-                        data_nascimento: data.data_nascimento,
-                        sexo: data.sexo,
-                        usuario_id: usuario.id
-                    },
-                    where: { usuario_id: usuario.id }
-                })
+        return await prisma.$transaction(async (tx) => {
+            const usuario = await tx.usuario.update({ where: { id }, data: { ...data } })
 
-                break
+            if (data.papel) {
+                await tx.atendente.deleteMany({ where: { usuario_id: id } })
+                await tx.medico.deleteMany({ where: { usuario_id: id } })
 
-            case 'ATENDENTE':
-                await prisma.atendente.update({ 
-                    data: {
-                        nome: data.nome,
-                        corem: data.corem,
-                        usuario_id: usuario.id
-                    },
-                    where: { usuario_id: usuario.id }
-                })
+                switch (data.papel) {
+                    case 'ATENDENTE':
+                        await tx.atendente.create({ 
+                            data: {
+                                corem: data.corem,
+                                usuario_id: id
+                            }
+                        })
 
-                break
+                        break
 
-            case 'MEDICO':
-                await prisma.medico.update({ 
-                    data: {
-                        nome: data.nome,
-                        prm: data.prm,
-                        usuario_id: usuario.id,
-                    },
-                    where: { usuario_id: usuario.id }
-                })
+                    case 'MEDICO':
+                        await tx.medico.create({ 
+                            data: {
+                                prm: data.prm,
+                                usuario_id: id
+                            }
+                        })
 
-                break
+                        break
 
-            case 'ADMIN':
-                break
+                    case 'ADMIN':
+                        break
+                }
+            }
 
-            default:
-                break
-        }
-
-        return usuario
+            return usuario
+        })  
     }
 
     async delete(id) {
@@ -152,4 +119,4 @@ class usuarioModel {
     }
 }
 
-export default new usuarioModel()
+export default new UsuarioModel()
