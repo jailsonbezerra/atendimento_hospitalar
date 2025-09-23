@@ -10,7 +10,7 @@ class UsuarioService {
     async create(data) {
         const hashSenha = await bcrypt.hash(data.senha, 10)
 
-        if (data.papel) data.papel = data.papel.toUpperCase()
+        data.papel = data.papel.toUpperCase()
 
         return await usuarioModel.create({
             ...data,
@@ -57,8 +57,6 @@ class UsuarioService {
 
         await this.findById(id)
         
-        if (data.data_nascimento) data.data_nascimento = new Date(data.data_nascimento)
-        if (data.sexo) data.sexo = data.sexo.toUpperCase()
         if (data.papel) data.papel = data.papel.toUpperCase()
                     
         if (data.senha) {
@@ -67,7 +65,7 @@ class UsuarioService {
             return await usuarioModel.update(id, { ...data, hash_senha: hashSenha })
         }
 
-        return await usuarioModel.update(id, { data })
+        return await usuarioModel.update(id, { ...data })
     }
 
     async delete(id) {

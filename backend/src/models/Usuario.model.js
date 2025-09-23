@@ -5,12 +5,12 @@ class UsuarioModel {
     async create(data) {        
         return await prisma.$transaction(async (tx) => {
             const usuario = await tx.usuario.create({ 
-                data: {
+                data: { 
                     email: data.email,
                     nome: data.nome,
-                    hash_senha: data.hash_senha,
                     papel: data.papel,
-                }
+                    hash_senha: data.hash_senha
+                 }
             })
 
             switch (data.papel) {
@@ -35,9 +35,6 @@ class UsuarioModel {
                     break
 
                 case 'ADMIN':
-                    break
-
-                default:
                     break
             }
 
@@ -78,36 +75,63 @@ class UsuarioModel {
 
     async update(id, data) {
         return await prisma.$transaction(async (tx) => {
-            const usuario = await tx.usuario.update({ where: { id }, data: { ...data } })
+            const usuarioDate = {
+                email: data.email,
+                nome: data.nome,
+                papel: data.papel,
+                hash_senha: data.hash_senha
+            }
 
-            if (data.papel) {
-                await tx.atendente.deleteMany({ where: { usuario_id: id } })
-                await tx.medico.deleteMany({ where: { usuario_id: id } })
-
-                switch (data.papel) {
-                    case 'ATENDENTE':
-                        await tx.atendente.create({ 
-                            data: {
-                                corem: data.corem,
-                                usuario_id: id
-                            }
-                        })
-
-                        break
-
-                    case 'MEDICO':
-                        await tx.medico.create({ 
-                            data: {
-                                prm: data.prm,
-                                usuario_id: id
-                            }
-                        })
-
-                        break
-
-                    case 'ADMIN':
-                        break
+            Object.keys(usuarioDate).forEach(key => {
+                if (usuarioDate[key] === undefined) {
+                    delete usuarioDate[key]
                 }
+            })
+
+            const usuario = await tx.usuario.update({ where: { id }, data: { ...usuarioDate } })
+
+            
+            switch (data.papel) {
+                case 'ATENDENTE':
+                    await tx.medico.deleteMany({ where: { usuario_id: id } })
+
+                    await tx.atendente.upsert({ 
+                        where: { usuario_id: id },
+                        update: {
+                            corem: data.corem
+                        },
+                        create: {
+                            corem: data.corem,
+                            usuario_id: id
+                        }
+                    })
+
+                    break
+
+                case 'MEDICO':
+                    await tx.atendente.deleteMany({ where: { usuario_id: id } })
+
+                    await tx.medico.upsert({ 
+                        where: { usuario_id: id },
+                        update: {
+                            prm: data.prm
+                        },
+                        create: {
+                            prm: data.prm,
+                            usuario_id: id
+                        }
+                    })
+
+                    break
+
+                case 'ADMIN':
+                    await tx.atendente.deleteMany({ where: { usuario_id: id } })
+                    await tx.medico.deleteMany({ where: { usuario_id: id } })
+
+                    break
+                  
+                default:
+                    break
             }
 
             return usuario

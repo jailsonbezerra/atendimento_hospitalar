@@ -1,98 +1,135 @@
-// src/components/Cadastro.jsx
-import React, { useState } from 'react';
-import { salvarPacientes, carregarPacientes, gerarFicha } from '../utils/localStorage';
-import { ToastContainer, toast } from 'react-toastify';
-import './Cadastro.css';
+import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./Cadastro.css";
+
+import BuscarPacienteBySus from "./BuscarPacienteBySus";
+
+import CadastroPacienteService from "../api/CadastroPacienteService";
 
 function Cadastro() {
+  const [cadastroPaciente, setCadastroPaciente] = useState({
+    sus: "",
+    nome: "",
+    data_nascimento: "",
+    sexo: "",
+    prioridade: "nao_urgente",
+    paciente_id: '',
+  });
 
-  const [nome, setNome] = useState('');
-  const [idade, setIdade] = useState('');
-  const [sexo, setSexo] = useState('');
-  const [prioridade, setPrioridade] = useState('');
-  const notify = () => toast.success("Paciente cadastrado com sucesso!");
+  const notify = (msg, type = "success") => {
+    type === "success" ? toast.success(msg) : toast.error(msg);
+  };
 
-  const handleSubmit = (event) => {
+  const handlePacienteEncontrado = (paciente) => {
+    if (paciente) {
+      setCadastroPaciente({
+        sus: paciente.sus || "",
+        nome: paciente.nome || "",
+        data_nascimento: paciente.data_nascimento ? new Date(paciente.data_nascimento).toISOString().split('T')[0] : "",
+        sexo: paciente.sexo || "",
+        prioridade: paciente.prioridade || "nao_urgente",
+        paciente_id: paciente.id || "",
+      });
+    }
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    let pacientes = carregarPacientes(); // função do localStorage
-
-    const novoPaciente = {
-      ficha: gerarFicha(), // função do localStorage
-      nome: nome,
-      idade: parseInt(idade),
-      sexo: sexo,
-      prioridade: prioridade,
-      status: 'aguardando_triagem',
-      isCalled: false,
-      calledTime: null,
-      conclusionTime: null,
-    };
-
-    pacientes.push(novoPaciente);
-    salvarPacientes(pacientes); // função do localStorage
-
-    setNome('');
-    setIdade('');
-    setSexo('');
-    setPrioridade('');
+    try {
+      await CadastroPacienteService.cadastrarPaciente({
+        prioridade: cadastroPaciente.prioridade,
+        paciente_id: cadastroPaciente.paciente_id,
+      });
+      notify("Paciente cadastrado com sucesso!");
+      setCadastroPaciente({
+        sus: "",
+        nome: "",
+        data_nascimento: "",
+        sexo: "",
+        prioridade: "",
+        paciente_id: '',
+      });
+    } catch (error) {
+      console.error("Erro ao cadastrar paciente:", error);
+      notify("Erro ao cadastrar paciente", "error");
+    }
   };
 
   return (
     <div className="container">
-      <a href="/" className="back-button">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
-          <path d="M0 0h24v24H0V0z" fill="none" />
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z" />
-        </svg>
-        Voltar ao Menu
-      </a>
-
+      <a href="/" className="back-button">Voltar ao Menu</a>
       <h1>Cadastro de Paciente</h1>
+
+      {/* Componente de busca */}
+      <BuscarPacienteBySus onPacienteEncontrado={handlePacienteEncontrado} />
+
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="nome">Nome Completo:</label>
-          <input type="text" id="nome" name="nome" placeholder="Nome do paciente" required value={nome}
-            onChange={(e) => setNome(e.target.value)} />
+          <label>Nome Completo:</label>
+          <input
+            type="text"
+            value={cadastroPaciente.nome}
+            onChange={(e) =>
+              setCadastroPaciente({ ...cadastroPaciente, nome: e.target.value })
+            }
+            required
+          />
         </div>
+
         <div className="form-group">
-          <label htmlFor="idade">Idade:</label>
-          <input type="number" id="idade" name="idade" placeholder="Idade do paciente" required min="0" value={idade}
-            onChange={(e) => setIdade(e.target.value)} />
+          <label>Data de Nascimento:</label>
+          <input
+            type="date"
+            value={cadastroPaciente.data_nascimento}
+            onChange={(e) =>
+              setCadastroPaciente({
+                ...cadastroPaciente,
+                data_nascimento: e.target.value,
+              })
+            }
+            required
+          />
         </div>
+
         <div className="form-group">
-          <label htmlFor="sexo">Sexo:</label>
-          <select id="sexo" name="sexo" required value={sexo} onChange={(e) => setSexo(e.target.value)}>
+          <label>Sexo:</label>
+          <select
+            value={cadastroPaciente.sexo}
+            onChange={(e) =>
+              setCadastroPaciente({ ...cadastroPaciente, sexo: e.target.value })
+            }
+            required
+          >
             <option value="">Selecione</option>
-            <option value="masculino">Masculino</option>
-            <option value="feminino">Feminino</option>
-            <option value="outro">Outro</option>
+            <option value={"masculino".toLocaleUpperCase()}>Masculino</option>
+            <option value={"feminino".toLocaleUpperCase()}>Feminino</option>
           </select>
         </div>
+
         <div className="form-group">
-          <label htmlFor="prioridade">Prioridade de Atendimento:</label>
-          <select id="prioridade" name="prioridade" required value={prioridade} onChange={(e) => setPrioridade(e.target.value)}>
-            <option value="">Selecione a gravidade</option>
+          <label>Prioridade de Atendimento:</label>
+          <select
+            value={cadastroPaciente.prioridade}
+            onChange={(e) =>
+              setCadastroPaciente({
+                ...cadastroPaciente,
+                prioridade: e.target.value,
+              })
+            }
+            required
+          >
             <option value="emergencia">Emergência (Vermelho)</option>
-            <option value="muito-urgente">Muito Urgente (Laranja)</option>
+            <option value="muito_urgente">Muito Urgente (Laranja)</option>
             <option value="urgente">Urgente (Amarelo)</option>
-            <option value="pouco-urgente">Pouco Urgente (Verde)</option>
-            <option value="nao-urgente">Não Urgente (Azul)</option>
+            <option value="pouco_urgente">Pouco Urgente (Verde)</option>
+            <option value="nao_urgente">Não Urgente (Azul)</option>
           </select>
         </div>
-        <button type="submit" onClick={notify}>Cadastrar Paciente</button>
-        <ToastContainer
-          position="top-right"
-          autoClose={2500}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
+
+        <button type="submit">Cadastrar Paciente</button>
+        <ToastContainer autoClose={2500} theme="light" />
       </form>
     </div>
   );

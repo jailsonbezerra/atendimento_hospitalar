@@ -3,6 +3,8 @@ import triagemModel from '../models/Triagem.model.js'
 
 class TriagemService {
     async create(data) {
+        if (data.prioridade) data.prioridade = data.prioridade.toUpperCase()
+        
         return await triagemModel.create(data)
     }
 

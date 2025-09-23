@@ -34,6 +34,18 @@ class PacienteController {
         }
     }
 
+    async findByPrioridade(req, res) {
+        const { triagem, atendimento } = req.query
+
+        try {
+            const pacientes = await pacienteService.findByPrioridade(triagem, atendimento)
+
+            return res.status(200).json(pacientes)
+        } catch (error) {
+            return res.status(400).json({ error: error.message })
+        }
+    }
+
     async findById(req, res) {
         const { id } = req.params
 
@@ -51,6 +63,18 @@ class PacienteController {
 
         try {
             const paciente = await pacienteService.update(id, req.body)
+
+            return res.status(200).json(paciente)
+        } catch (error) {
+            return res.status(400).json({ error: error.message })
+        }
+    }
+
+    async updateStatus(req, res) {
+        const { id } = req.params
+
+        try {
+            const paciente = await pacienteService.updateStatus(id, req.body)
 
             return res.status(200).json(paciente)
         } catch (error) {

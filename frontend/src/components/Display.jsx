@@ -2,15 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { carregarPacientes, sortPacientesByPriority } from '../utils/localStorage';
 import './Display.css'; // Importa o CSS específico deste componente
+import pacienteService from '../api/PacienteService' // Importa a instância do axios configurada
 
 function Display() {
   const [pacientes, setPacientes] = useState([]);
   const [currentPatientDisplay, setCurrentPatientDisplay] = useState(null);
   const [nextPatientsList, setNextPatientsList] = useState([]);
+  const [pacientesApi, setPacientesApi] = useState([]) // Estado para armazenar pacientes da API
 
   const display = () => {
     const loadedPatients = carregarPacientes();
-    setPacientes(loadedPatients); 
+    setPacientes(loadedPatients);
+
+    
 
     let currentPatient = null;
     let currentPatientLoc = '';
@@ -41,9 +45,16 @@ function Display() {
     setNextPatientsList(finalNextPatients.slice(0, 5));
   };
 
-  useEffect(() => {
+  useEffect( () => {
     display(); 
-    const intervalId = setInterval(display, 3000); 
+    const intervalId = setInterval(display, 3000);
+    
+    pacienteService.getAllPacientes()
+    .then((res) => {
+      setPacientesApi(res.data);
+      console.log("Pacientes da API:", res.data); // aqui sim
+    })
+    .catch((err) => console.error("Erro ao carregar pacientes da API:", err));
 
     return () => clearInterval(intervalId);
   }, []); 

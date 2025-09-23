@@ -12,8 +12,10 @@ class PacienteRoute {
     routes() {
         this.route.post('/', pacienteController.create)
         this.route.get('/', pacienteController.findAll)
+        this.route.get('/fila', pacienteController.findByPrioridade)
         this.route.get('/:id', pacienteController.findById)
         this.route.put('/:id', pacienteController.update)
+        this.route.patch('/:id/status', pacienteController.updateStatus)
         this.route.delete('/:id', pacienteController.delete)
         this.route.get('/sus/:sus', pacienteController.findBySus)
     }

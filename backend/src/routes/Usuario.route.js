@@ -13,7 +13,8 @@ class UsuarioRoute {
 
     routes() {
         this.route.post('/login', usuarioController.login)
-        this.route.post('/create', autenticarAdmin, usuarioController.create)
+        this.route.post('/create', usuarioController.create)
+        // this.route.post('/create', autenticarAdmin, usuarioController.create)
         this.route.get('', usuarioController.findAll)
         this.route.get('/:id', autenticarAdmin, usuarioController.findById)
         this.route.put('/:id', autenticarAdmin, usuarioController.update)
