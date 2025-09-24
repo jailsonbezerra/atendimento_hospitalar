@@ -46,6 +46,18 @@ class UsuarioController {
         }
     }
 
+    async findByEmail(req, res) {
+        const { email } = req.params
+
+        try {
+            const usuario = await usuarioService.findByEmail(email)
+
+            return res.status(200).json(usuario)
+        } catch (error) {
+            return res.status(400).json({ error: error.message })
+        }
+    }
+
     async update(req, res) {
         const { id } = req.params
 

@@ -35,7 +35,16 @@ class TriagemModel {
     }
 
     async findAll() {
-        return await prisma.triagem.findMany()
+        return await prisma.triagem.findMany({
+            select: {
+                peso: true,
+                altura: true,
+                temperatura: true,
+                pressao: true,
+                cadastro: true,
+                atendente: true
+            }
+        })
     }
 
     async findById(id) {

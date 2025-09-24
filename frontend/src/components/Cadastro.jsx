@@ -62,7 +62,6 @@ function Cadastro() {
       <a href="/" className="back-button">Voltar ao Menu</a>
       <h1>Cadastro de Paciente</h1>
 
-      {/* Componente de busca */}
       <BuscarPacienteBySus onPacienteEncontrado={handlePacienteEncontrado} />
 
       <form onSubmit={handleSubmit}>

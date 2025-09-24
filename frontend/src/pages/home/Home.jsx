@@ -1,0 +1,38 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUser, faSearch, faMedkit, faFolderOpen, faUserAlt } from '@fortawesome/free-solid-svg-icons'
+
+
+export default function Home({onNavigate}) {
+    return (
+        <main className="menu-container">
+            <h1>Home Page</h1>
+
+            <section className="menu-grid">
+                <a className="menu-item" onClick={() => onNavigate('cadastro')}>
+                    <FontAwesomeIcon icon={faUser} />
+                    Cadastro Paciente
+                </a>
+
+                <a className="menu-item" onClick={() => onNavigate('triagem')}>
+                    <FontAwesomeIcon icon={faSearch} />
+                    Triagem
+                </a>
+
+                <a className="menu-item" onClick={() => onNavigate('atendimento')}>
+                    <FontAwesomeIcon icon={faMedkit} />
+                    Atendimento Médico
+                </a>
+
+                <a className="menu-item" onClick={() => onNavigate('display')}>
+                    <FontAwesomeIcon icon={faFolderOpen} />
+                    Display
+                </a>
+
+                <a className="menu-item" onClick={() => onNavigate('usuario')}>
+                    <FontAwesomeIcon icon={faUserAlt} />
+                    Login e cadastro de Usuário
+                </a>
+            </section>
+        </main>
+    )
+}
