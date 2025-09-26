@@ -1,4 +1,6 @@
 import cadastroPacienteModel from '../models/CadastroPaciente.model.js'
+import pacienteModel from '../models/Paciente.model.js'
+import { prisma } from '../models/prisma.js'
 
 
 class CadastroPacienteService {
@@ -6,8 +8,30 @@ class CadastroPacienteService {
         if (data.prioridade) data.prioridade = data.prioridade.toUpperCase()
         if (data.status_triagem) data.status_triagem = data.status_triagem.toUpperCase()
         if (data.status_atendimento) data.status_atendimento = data.status_atendimento.toUpperCase()
+        if (data.data_nascimento) data.data_nascimento = new Date(data.data_nascimento)
+
+        // console.log(data)
             
-        return cadastroPacienteModel.create(data)
+        return prisma.$transaction(async (tx) => {
+            let pacienteId = data.paciente_id
+
+            if (!pacienteId) {
+                const novoPaciente = await pacienteModel.create({
+                    sus: data.sus,
+                	nome: data.nome,
+                	data_nascimento: data.data_nascimento,
+                	sexo: data.sexo
+                }, tx)
+
+                pacienteId = novoPaciente.id
+            }
+
+            return await cadastroPacienteModel.create({
+                paciente_id: pacienteId,
+                prioridade: data.prioridade
+            }, tx)
+
+        })
     }
 
     async findAll() {

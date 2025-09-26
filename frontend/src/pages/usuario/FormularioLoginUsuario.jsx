@@ -1,29 +1,21 @@
 import { useState, useEffect } from 'react'
 
-import usuarioService from '../api/usuarioService'
-import { notificacao } from '../utils/notificacao'
+import usuarioService from '../../api/usuarioService'
+import { notificacao } from '../../utils/notificacao'
 
 
-export default function FormularioLoginUsuario({ onBackToMenu }) {
+export default function FormularioLoginUsuario({ onLoginSuccess, onBackToMenu }) {
     const [usuario, setUsuario] = useState({email: '', senha: ''})
-    const [token, setToken] = useState(null)
-
-    useEffect(() => {
-        const savedToken = localStorage.getItem('token')
-
-        if (savedToken) setToken(savedToken)
-    }, [])
 
     const handleSubmit = async (event) => {
         event.preventDefault()
 
         try {
+            
             const response = await usuarioService.loginUsuario(usuario)
-
-            setToken(response.data.token)
-
-            localStorage.setItem('token', response.data.token)
-
+            
+            onLoginSuccess(response.data.token)
+            
             notificacao('Usuário logado com sucesso!')
 
             onBackToMenu()

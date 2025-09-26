@@ -3,13 +3,20 @@ import { prisma } from './prisma.js'
 
 class CadastroPacienteModel {
     async create(data) {
+        const { paciente_id, prioridade } = data
+        
         return prisma.cadastroPaciente.create({
-            data,
+            data:{
+                prioridade,
+                paciente: { connect: { id: paciente_id } }
+            }
         })
     }
 
     async findAll() {
-        return prisma.cadastroPaciente.findMany()
+        return prisma.cadastroPaciente.findMany({
+            include: { paciente: true },
+        })
     }
 
     async findById(id) {

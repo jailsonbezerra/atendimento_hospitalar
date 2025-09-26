@@ -1,24 +1,25 @@
-import FormularioCadastroUsuario from '../../components/FormularioCadastroUsuario'
-import FormularioLoginUsuario from '../../components/FormularioLoginUsuario'
+import FormularioCadastroUsuario from './FormularioCadastroUsuario'
+import FormularioLoginUsuario from './FormularioLoginUsuario'
 
 import './CadastroLoginUsuario.css'
 
 
-export default function CadastroLoginUsuario({onBackToMenu}) {
+export default function CadastroLoginUsuario({ onLoginSuccess, onBackToMenu, usuario }) {
     return (
-        <main className="container">
-            <a href="/" className="back-button">Voltar ao Menu</a>
+        <main className='container'>
+            {
+                usuario.papel === 'ADMIN' &&
+                <section className='cadastro-usuario'>
+                    <h1>Cadastrar Usuario</h1>
 
-            <section className="cadastro-usuario">
-                <h1>Cadastrar Usuario</h1>
+                    <FormularioCadastroUsuario />
+                </section>
+            }
 
-                <FormularioCadastroUsuario onBackToMenu={onBackToMenu} />
-            </section>
-
-            <section className="login-usuario">
+            <section className='login-usuario'>
                 <h1>Login de Usuario</h1>
 
-                <FormularioLoginUsuario onBackToMenu={onBackToMenu} />
+                <FormularioLoginUsuario onBackToMenu={onBackToMenu} onLoginSuccess={onLoginSuccess} />
             </section>
         </main>
     )

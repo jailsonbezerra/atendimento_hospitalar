@@ -19,7 +19,7 @@ class PacienteService {
     }
 
     async getPacientesByPrioridade(triagem, atendimento) {
-        return await api.get(`/pacientes/prioridade?triagem=${triagem}&atendimento=${atendimento}`)
+        return await api.get(`/pacientes/fila?triagem=${triagem}&atendimento=${atendimento}`)
     }
 
     async updatePaciente(id, paciente) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
-import usuarioService from '../api/usuarioService'
-import { notificacao } from '../utils/notificacao'
+import usuarioService from '../../api/usuarioService'
+import { notificacao } from '../../utils/notificacao'
 
 
 export default function FormularioCadastroUsuario({ onBackToMenu }) {
@@ -15,19 +15,19 @@ export default function FormularioCadastroUsuario({ onBackToMenu }) {
         event.preventDefault()
 
         try {
-            const emailExists = await usuarioService.getUsuarioByEmail(usuario.email)
+            // const emailExists = await usuarioService.getUsuarioByEmail(usuario.email)
 
-            if (emailExists) {
-                notificacao('Email já cadastrado.', 'error')
+            // if (emailExists) {
+            //     notificacao('Email já cadastrado.', 'error')
 
-                return
-            }
+            //     return
+            // }
 
             await usuarioService.cadastrarUsuario(usuario)
 
             notificacao('Usuário cadastrado com sucesso!')
         } catch (error) {
-            notificacao('Erro ao cadastrar usuário.', error)
+            notificacao('Erro ao cadastrar usuário.', 'error')
         }
     }
 

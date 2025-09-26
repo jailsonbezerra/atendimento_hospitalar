@@ -2,7 +2,7 @@ import express from 'express'
 
 import usuarioController from '../controllers/Usuario.controller.js'
 
-import { autenticarAdmin } from '../middlewares/autenticarUsuario.js'
+import { autenticarAdmin, getUserToken } from '../middlewares/autenticarUsuario.js'
 
 
 class UsuarioRoute {
@@ -12,9 +12,10 @@ class UsuarioRoute {
     }
 
     routes() {
+        this.route.get('/me', getUserToken, usuarioController.me)
         this.route.post('/login', usuarioController.login)
-        this.route.post('/create', usuarioController.create)
-        // this.route.post('/create', autenticarAdmin, usuarioController.create)
+        // this.route.post('/create', usuarioController.create)
+        this.route.post('/create', autenticarAdmin, usuarioController.create)
         this.route.get('/', usuarioController.findAll)
         this.route.get('/email/:email', usuarioController.findByEmail)
         this.route.get('/:id', autenticarAdmin, usuarioController.findById)

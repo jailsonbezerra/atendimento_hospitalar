@@ -1,0 +1,84 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+  box-shadow: 0 2px 8px var(--cor-sombra);
+  background-color: #fff;
+  font-size: 1rem;
+}
+
+thead tr {
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-claro);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+td[data-label="Acao"] {
+  text-align: center;
+}
+
+td button {
+  padding: 8px 12px;
+  background-color: var(--cor-sucesso);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+td button:hover {
+  background-color: #034728; 
+}
+
+tbody tr:not([class*="prioridade-"]):nth-of-type(even) {
+  background-color: var(--cor-fundo);
+}
+
+tbody tr:not([class*="prioridade-"]):hover {
+    background-color: #e2e6ea;
+}
+
+tbody tr.prioridade-emergencia {
+  background-color: #ffe3e3;
+  --row-hover-color: #f8d7da; 
+}
+
+tbody tr.prioridade-muito_urgente {
+  background-color: #fff0e0;
+  --row-hover-color: #ffe4c9;
+}
+
+tbody tr.prioridade-urgente {
+  background-color: #fff9e0;
+  --row-hover-color: #fff3cd;
+}
+
+tbody tr.prioridade-pouco_urgente {
+  background-color: #e3f9e3;
+  --row-hover-color: #d1e7dd;
+}
+
+tbody tr.prioridade-nao_urgente {
+  background-color: #e0f7ff;
+  --row-hover-color: #cff4fc;
+}
+
+tbody tr[class*="prioridade-"]:hover {
+  background-color: var(--row-hover-color);
+  cursor: pointer;
+}
+
+tbody tr[class*="prioridade-"] td {
+  color: #333;
+  font-weight: 500;
+}
